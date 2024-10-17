@@ -1,16 +1,51 @@
-# README
+# COECSS - Class Scheduling System
 
-## About
+The Class Scheduling System for CTU Moalboal simplifies scheduling for instructors, rooms, and sections. It supports flexible time slots and ensures efficient weekly scheduling tailored to academic requirements.
 
-This is the official Wails Svelte template.
+## Features
 
-## Live Development
+- **Instructor & Room Management**
+- **Custom Time Slots**: MWF (1, 1.5 hours), TTH (2 hours)
+- **Optimized for MWF & TTH Schedules**
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+## Technologies
 
-## Building
+- **Frontend**: [SvelteKit](https://kit.svelte.dev/), [TypeScript](https://www.typescriptlang.org/), [TailwindCSS](https://tailwindcss.com/)
+- **Backend**: [Wails](https://wails.io/) (Go)
+- **Database**: [bbolt](https://github.com/etcd-io/bbolt)
 
-To build a redistributable, production mode package, use `wails build`.
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/), [Go](https://golang.org/), [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+
+### Installation
+
+1. Clone the repo:
+
+   ```bash
+   git clone https://github.com/jimcan92/coecss.git
+   cd coecss
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Run in development:
+
+   ```bash
+   wails dev
+   ```
+
+4. Build for production:
+   ```bash
+   wails build
+   ```
+
+## License
+
+Licensed under the MIT License.
