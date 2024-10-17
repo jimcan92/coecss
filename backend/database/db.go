@@ -227,52 +227,6 @@ func GetLastInserted[T any](db *bbolt.DB, bucketName BucketName) ([]byte, *T, er
 }
 
 func EmitChange[T models.Identifiable](ctx context.Context, items []T, operation string) error {
-	// var items []T
-
-	// // Open a read transaction
-	// err := db.View(func(tx *bbolt.Tx) error {
-	// 	bucket := tx.Bucket([]byte(bucketName))
-	// 	if bucket == nil {
-	// 		return fmt.Errorf("bucket %s not found", bucketName)
-	// 	}
-
-	// 	// Create a cursor to iterate over the bucket's entries
-	// 	cursor := bucket.Cursor()
-
-	// 	// Loop through all entries in the bucket
-	// 	for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-	// 		var item T
-	// 		err := json.Unmarshal(v, &item) // Unmarshal the JSON value into item
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		items = append(items, item) // Add the item to the list
-	// 	}
-	// 	return nil
-	// })
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// Create a payload containing the operation and the list of items
-	// event := struct {
-	// 	Event string `json:"event"`
-	// 	ItemType
-	// 	Items     []T    `json:"items"`
-	// }{
-	// 	Event: operation,
-	// 	BucketName: ,
-	// 	Items:     items,
-	// }
-
-	// Marshal the event to JSON
-	// data, err := json.Marshal(event)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// Emit the event with the bucket data
 	runtime.EventsEmit(ctx, "data-changed",
 		map[string]interface{}{
 			"model": reflect.TypeOf(new(T)).Elem().Name(),
@@ -281,25 +235,4 @@ func EmitChange[T models.Identifiable](ctx context.Context, items []T, operation
 		})
 
 	return nil
-}
-
-func SetupDone(db *bbolt.DB) bool {
-
-	err := db.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(UsersBucket))
-		if bucket == nil {
-			return fmt.Errorf("bucket-not-found")
-		}
-
-		cursor := bucket.Cursor()
-		k, _ := cursor.First()
-		if k == nil {
-			return fmt.Errorf("users-bucket-empty")
-		}
-		return nil
-	})
-
-	fmt.Println(err == nil)
-
-	return err == nil
 }

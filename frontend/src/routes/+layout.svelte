@@ -5,7 +5,6 @@
 	import { appState } from '$lib/states/app-state.svelte';
 	import { user } from '$lib/states/session.svelte';
 	import { users } from '$lib/states/users.svelte';
-	import { CheckIfNeedsSetup } from '$lib/wailsjs/go/backend/App';
 	import { EventsOn } from '$lib/wailsjs/runtime/runtime';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount } from 'svelte';
@@ -22,10 +21,16 @@
 			console.log(e);
 		});
 
-		if (await CheckIfNeedsSetup()) goto('/setup');
-		appState.setInitialLoading(false);
+		await users.load();
 
-		users.load();
+		console.log(appState.needsSetup);
+
+		if (appState.needsSetup) {
+			console.log('needs setup');
+
+			await goto('/setup');
+		}
+		appState.setInitialLoading(false);
 	});
 </script>
 

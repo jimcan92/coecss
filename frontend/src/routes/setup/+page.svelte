@@ -12,8 +12,9 @@
 	// import {FormControl} from '$lib/components/ui/form'
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
+	import { appState } from '$lib/states/app-state.svelte';
 	import { showError } from '$lib/toasts';
-	import { CheckIfNeedsSetup, RegisterUserCommand } from '$lib/wailsjs/go/backend/App';
+	import { RegisterUserCommand } from '$lib/wailsjs/go/backend/App';
 
 	let uname = $state('');
 	let passw = $state('');
@@ -25,7 +26,11 @@
 		if (passw != passw2) return showError('passwords-dont-match');
 
 		await RegisterUserCommand(uname.trim(), passw.trim(), 'Admin').catch(showError);
-		if (!(await CheckIfNeedsSetup())) goto('/');
+		if (!appState.needsSetup) {
+			console.log('does not need setup');
+
+			await goto('/');
+		}
 	}
 </script>
 

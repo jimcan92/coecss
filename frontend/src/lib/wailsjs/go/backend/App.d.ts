@@ -4,8 +4,6 @@ import {models} from '../models';
 
 export function AddInstructor(arg1:string):Promise<models.Instructor>;
 
-export function CheckIfNeedsSetup():Promise<boolean>;
-
 export function CloseDB():Promise<void>;
 
 export function DeleteInstructor(arg1:string):Promise<void>;

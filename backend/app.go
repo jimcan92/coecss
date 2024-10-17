@@ -58,12 +58,4 @@ func (a *App) CloseDB() {
 
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
-
-	if !database.SetupDone(a.DB) {
-		runtime.EventsEmit(a.ctx, "needs-setup")
-	}
-}
-
-func (a *App) CheckIfNeedsSetup() bool {
-	return !database.SetupDone(a.DB)
 }

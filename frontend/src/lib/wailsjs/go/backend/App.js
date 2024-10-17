@@ -6,10 +6,6 @@ export function AddInstructor(arg1) {
   return window['go']['backend']['App']['AddInstructor'](arg1);
 }
 
-export function CheckIfNeedsSetup() {
-  return window['go']['backend']['App']['CheckIfNeedsSetup']();
-}
-
 export function CloseDB() {
   return window['go']['backend']['App']['CloseDB']();
 }
