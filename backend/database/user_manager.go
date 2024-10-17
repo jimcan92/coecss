@@ -2,14 +2,15 @@ package database
 
 import (
 	"coecss/backend/models"
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"go.etcd.io/bbolt"
 )
 
-func RegisterUser(db *bbolt.DB, user *models.User) error {
-	return db.Update(func(tx *bbolt.Tx) error {
+func RegisterUser(ctx context.Context, db *bbolt.DB, user *models.User) error {
+	err := db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(UsersBucket))
 		if bucket == nil {
 			return fmt.Errorf("bucket-not-found")
@@ -31,6 +32,21 @@ func RegisterUser(db *bbolt.DB, user *models.User) error {
 
 		return bucket.Put([]byte(user.Username), data)
 	})
+	if err != nil {
+		return err // Return error if marshaling fails
+	}
+
+	items, err := GetAllItems[models.User](db, UsersBucket)
+	if err != nil {
+		return err
+	}
+
+	err = EmitChange[models.User](ctx, items, EventAdd)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func LoginUser(db *bbolt.DB, username, password string) (*models.User, error) {

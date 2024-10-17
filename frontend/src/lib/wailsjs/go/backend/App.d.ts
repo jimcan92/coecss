@@ -10,6 +10,8 @@ export function CloseDB():Promise<void>;
 
 export function DeleteInstructor(arg1:string):Promise<void>;
 
+export function DeleteUser(arg1:string):Promise<void>;
+
 export function GetAllInstructors():Promise<Array<models.Instructor>>;
 
 export function GetInstructor(arg1:string):Promise<models.Instructor>;
@@ -17,6 +19,8 @@ export function GetInstructor(arg1:string):Promise<models.Instructor>;
 export function GetSession(arg1:string):Promise<models.Session>;
 
 export function GetSessions():Promise<Array<models.Session>>;
+
+export function GetUser(arg1:string):Promise<models.User>;
 
 export function GetUsers():Promise<Array<models.User>>;
 
@@ -26,7 +30,7 @@ export function LoginUserCommand(arg1:string,arg2:string):Promise<models.User>;
 
 export function Logout():Promise<void>;
 
-export function RegisterUserCommand(arg1:string,arg2:string):Promise<void>;
+export function RegisterUserCommand(arg1:string,arg2:string,arg3:models.UserRole):Promise<void>;
 
 export function SessionActivate():Promise<void>;
 

@@ -18,6 +18,10 @@ export function DeleteInstructor(arg1) {
   return window['go']['backend']['App']['DeleteInstructor'](arg1);
 }
 
+export function DeleteUser(arg1) {
+  return window['go']['backend']['App']['DeleteUser'](arg1);
+}
+
 export function GetAllInstructors() {
   return window['go']['backend']['App']['GetAllInstructors']();
 }
@@ -32,6 +36,10 @@ export function GetSession(arg1) {
 
 export function GetSessions() {
   return window['go']['backend']['App']['GetSessions']();
+}
+
+export function GetUser(arg1) {
+  return window['go']['backend']['App']['GetUser'](arg1);
 }
 
 export function GetUsers() {
@@ -50,8 +58,8 @@ export function Logout() {
   return window['go']['backend']['App']['Logout']();
 }
 
-export function RegisterUserCommand(arg1, arg2) {
-  return window['go']['backend']['App']['RegisterUserCommand'](arg1, arg2);
+export function RegisterUserCommand(arg1, arg2, arg3) {
+  return window['go']['backend']['App']['RegisterUserCommand'](arg1, arg2, arg3);
 }
 
 export function SessionActivate() {

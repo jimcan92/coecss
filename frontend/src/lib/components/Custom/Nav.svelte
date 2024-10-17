@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { BookCopy, CalendarCheck, House, UsersRound, Warehouse, Workflow } from 'lucide-svelte';
+	import {
+		BookCopy,
+		CalendarCheck,
+		House,
+		Users,
+		UsersRound,
+		Warehouse,
+		Workflow
+	} from 'lucide-svelte';
 
 	import { page } from '$app/stores';
 	import ctuLogo from '$lib/images/ctu.png';
@@ -42,6 +50,11 @@
 			to: '/instructors',
 			label: 'Instructors',
 			icon: instructorsIcon
+		},
+		{
+			to: '/users',
+			label: 'Users',
+			icon: usersIcon
 		}
 	];
 </script>
@@ -67,6 +80,10 @@
 {/snippet}
 
 {#snippet instructorsIcon()}
+	<Users class="h-4 w-4" />
+{/snippet}
+
+{#snippet usersIcon()}
 	<UsersRound class="h-4 w-4" />
 {/snippet}
 

@@ -3,6 +3,7 @@ package backend
 import (
 	"coecss/backend/database"
 	"coecss/backend/models"
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -10,8 +11,8 @@ import (
 	"go.etcd.io/bbolt"
 )
 
-func updateSession(db *bbolt.DB, s *models.Session) {
-	err := database.UpdateItem(db, database.SessionsBucket, s)
+func updateSession(ctx context.Context, db *bbolt.DB, s *models.Session) {
+	err := database.UpdateItem(ctx, db, database.SessionsBucket, s)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -19,12 +20,12 @@ func updateSession(db *bbolt.DB, s *models.Session) {
 
 func (a *App) SessionActivate() {
 	a.Session.Active = true
-	updateSession(a.DB, a.Session)
+	updateSession(a.ctx, a.DB, a.Session)
 }
 
 func (a *App) SessionDeactivate() {
 	a.Session.Active = false
-	updateSession(a.DB, a.Session)
+	updateSession(a.ctx, a.DB, a.Session)
 }
 
 func (a *App) SessionState() bool {
@@ -36,7 +37,7 @@ func (a *App) SessionTerminate() {
 	if a.Session != nil {
 		a.Session.Active = false
 		a.Session.Terminated = time.Now()
-		updateSession(a.DB, a.Session)
+		updateSession(a.ctx, a.DB, a.Session)
 		a.SetSession(nil)
 	}
 }

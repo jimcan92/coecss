@@ -10,9 +10,10 @@ import (
 )
 
 // RegisterUserCommand registers a new user
-func (a *App) RegisterUserCommand(username, password string) error {
-	user := &models.User{Username: username, Password: password, Role: "Student"}
-	return database.RegisterUser(a.DB, user)
+func (a *App) RegisterUserCommand(username, password string, role models.UserRole) error {
+	user := &models.User{Username: username, Password: password, Role: role}
+
+	return database.RegisterUser(a.ctx, a.DB, user)
 }
 
 // LoginUserCommand logs in a user
@@ -25,7 +26,7 @@ func (a *App) LoginUserCommand(username, password string) (*models.User, error) 
 
 	session := &models.Session{ID: uuid.NewString(), UserID: user.Username, Active: true, Created: time.Now()}
 
-	sessionAddErr := database.AddItem(a.DB, database.SessionsBucket, session)
+	sessionAddErr := database.AddItem(a.ctx, a.DB, database.SessionsBucket, session)
 	if sessionAddErr != nil {
 		fmt.Println("Session add error", sessionAddErr)
 	}
@@ -42,4 +43,12 @@ func (a *App) Logout() {
 
 func (a *App) GetUsers() ([]models.User, error) {
 	return database.GetAllItems[models.User](a.DB, database.UsersBucket)
+}
+
+func (a *App) GetUser(id string) (*models.User, error) {
+	return database.GetItem[models.User](a.DB, database.UsersBucket, id)
+}
+
+func (a *App) DeleteUser(id string) error {
+	return database.DeleteItem[models.User](a.ctx, a.DB, database.UsersBucket, id)
 }

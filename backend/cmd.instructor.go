@@ -22,7 +22,7 @@ func (a *App) GetAllInstructors() ([]models.Instructor, error) {
 func (a *App) AddInstructor(name string) (*models.Instructor, error) {
 	instructor := models.NewInstructor(name)
 
-	err := database.AddItem(a.DB, database.InstructorsBucket, instructor)
+	err := database.AddItem(a.ctx, a.DB, database.InstructorsBucket, instructor)
 
 	return instructor, err
 }
@@ -33,7 +33,7 @@ func (a *App) UpdateInstructor(instructor *models.Instructor) error {
 		return fmt.Errorf("instructor ID cannot be empty")
 	}
 
-	return database.UpdateItem(a.DB, database.InstructorsBucket, *instructor)
+	return database.UpdateItem(a.ctx, a.DB, database.InstructorsBucket, *instructor)
 }
 
 func (a *App) DeleteInstructor(id string) error {
@@ -41,5 +41,5 @@ func (a *App) DeleteInstructor(id string) error {
 		return fmt.Errorf("instructor ID cannot be empty")
 	}
 
-	return database.DeleteItem[models.Instructor](a.DB, database.InstructorsBucket, id)
+	return database.DeleteItem[models.Instructor](a.ctx, a.DB, database.InstructorsBucket, id)
 }

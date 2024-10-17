@@ -2,9 +2,12 @@ package database
 
 import (
 	"coecss/backend/models"
+	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"go.etcd.io/bbolt"
 )
 
@@ -17,6 +20,12 @@ const (
 	SubjectsBucket    BucketName = "Subjects"
 	SectionsBucket    BucketName = "Sections"
 	RoomsBucket       BucketName = "Rooms"
+)
+
+const (
+	EventAdd    = "add"
+	EventUpdate = "update"
+	EventDelete = "delete"
 )
 
 var BucketNames = []BucketName{
@@ -82,8 +91,8 @@ func GetAllItems[T models.Identifiable](db *bbolt.DB, bucketName BucketName) ([]
 	return items, nil // Return the slice of items
 }
 
-func AddItem[T models.Identifiable](db *bbolt.DB, bucketName BucketName, item T) error {
-	return db.Update(func(tx *bbolt.Tx) error {
+func AddItem[T models.Identifiable](ctx context.Context, db *bbolt.DB, bucketName BucketName, item T) error {
+	err := db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketName))
 		if bucket == nil {
 			return fmt.Errorf("bucket not found: %s", bucketName)
@@ -94,16 +103,29 @@ func AddItem[T models.Identifiable](db *bbolt.DB, bucketName BucketName, item T)
 			return err
 		}
 
-		fmt.Println(item.GetID())
-
 		return bucket.Put([]byte(item.GetID()), data)
 	})
+	if err != nil {
+		return err
+	}
+
+	items, err := GetAllItems[T](db, bucketName)
+	if err != nil {
+		return err
+	}
+
+	err = EmitChange[T](ctx, items, EventAdd)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func UpdateItem[T models.Identifiable](db *bbolt.DB, bucketName BucketName, item T) error {
+func UpdateItem[T models.Identifiable](ctx context.Context, db *bbolt.DB, bucketName BucketName, item T) error {
 	id := item.GetID()
 
-	return db.Update(func(tx *bbolt.Tx) error {
+	err := db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketName))
 		if bucket == nil {
 			return fmt.Errorf("bucket not found: %s", bucketName)
@@ -115,13 +137,28 @@ func UpdateItem[T models.Identifiable](db *bbolt.DB, bucketName BucketName, item
 			return err // Return error if marshaling fails
 		}
 
-		// Update the item in the bucket
 		return bucket.Put([]byte(id), data)
 	})
+
+	if err != nil {
+		return err // Return error if marshaling fails
+	}
+
+	items, err := GetAllItems[T](db, bucketName)
+	if err != nil {
+		return err
+	}
+
+	err = EmitChange[T](ctx, items, EventUpdate)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func DeleteItem[T models.Identifiable](db *bbolt.DB, bucketName BucketName, id string) error {
-	return db.Update(func(tx *bbolt.Tx) error {
+func DeleteItem[T models.Identifiable](ctx context.Context, db *bbolt.DB, bucketName BucketName, id string) error {
+	err := db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketName))
 		if bucket == nil {
 			return fmt.Errorf("bucket not found: %s", bucketName)
@@ -134,6 +171,21 @@ func DeleteItem[T models.Identifiable](db *bbolt.DB, bucketName BucketName, id s
 
 		return nil // Successful deletion
 	})
+	if err != nil {
+		return err // Return error if marshaling fails
+	}
+
+	items, err := GetAllItems[T](db, bucketName)
+	if err != nil {
+		return err
+	}
+
+	err = EmitChange[T](ctx, items, EventDelete)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetLastInserted[T any](db *bbolt.DB, bucketName BucketName) ([]byte, *T, error) {
@@ -172,6 +224,63 @@ func GetLastInserted[T any](db *bbolt.DB, bucketName BucketName) ([]byte, *T, er
 	}
 
 	return lastKey, &result, nil
+}
+
+func EmitChange[T models.Identifiable](ctx context.Context, items []T, operation string) error {
+	// var items []T
+
+	// // Open a read transaction
+	// err := db.View(func(tx *bbolt.Tx) error {
+	// 	bucket := tx.Bucket([]byte(bucketName))
+	// 	if bucket == nil {
+	// 		return fmt.Errorf("bucket %s not found", bucketName)
+	// 	}
+
+	// 	// Create a cursor to iterate over the bucket's entries
+	// 	cursor := bucket.Cursor()
+
+	// 	// Loop through all entries in the bucket
+	// 	for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+	// 		var item T
+	// 		err := json.Unmarshal(v, &item) // Unmarshal the JSON value into item
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		items = append(items, item) // Add the item to the list
+	// 	}
+	// 	return nil
+	// })
+
+	// if err != nil {
+	// 	return err
+	// }
+
+	// Create a payload containing the operation and the list of items
+	// event := struct {
+	// 	Event string `json:"event"`
+	// 	ItemType
+	// 	Items     []T    `json:"items"`
+	// }{
+	// 	Event: operation,
+	// 	BucketName: ,
+	// 	Items:     items,
+	// }
+
+	// Marshal the event to JSON
+	// data, err := json.Marshal(event)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// Emit the event with the bucket data
+	runtime.EventsEmit(ctx, "data-changed",
+		map[string]interface{}{
+			"model": reflect.TypeOf(new(T)).Elem().Name(),
+			"items": items,
+			"event": operation,
+		})
+
+	return nil
 }
 
 func SetupDone(db *bbolt.DB) bool {

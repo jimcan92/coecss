@@ -24,7 +24,7 @@
 
 		if (passw != passw2) return showError('passwords-dont-match');
 
-		await RegisterUserCommand(uname.trim(), passw.trim()).catch(showError);
+		await RegisterUserCommand(uname.trim(), passw.trim(), 'Admin').catch(showError);
 		if (!(await CheckIfNeedsSetup())) goto('/');
 	}
 </script>
